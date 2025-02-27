@@ -1,0 +1,1 @@
+TriggerEvent('chat:addSuggestion', '/reward', 'Claim je 100K!')
