@@ -1,1 +1,1 @@
-TriggerEvent('chat:addSuggestion', '/reward', 'Claim je 100K!')
+TriggerEvent('chat:addSuggestion', '/claimreward', 'Claim je 100K!')
