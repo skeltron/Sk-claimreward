@@ -1,23 +1,38 @@
 local file = LoadResourceFile(GetCurrentResourceName(), 'claimed.json')
-local data = json.decode(file)
+local data = file and json.decode(file) or {}
 
-RegisterCommand('claimreward', function(source, args, rawCommand)
-	local xPlayer = ESX.GetPlayerFromId(source)
-    local license
-
-    for k, v in ipairs(GetPlayerIdentifiers(source)) do
-        if string.match(v, "license:") then
-            license = v
-            break
+local function getLicense(source)
+    for _, id in ipairs(GetPlayerIdentifiers(source)) do
+        if id:sub(1,8) == "license:" then
+            return id
         end
     end
+    return nil
+end
 
-    if not data[license] then
-        data[license] = true
-        SaveResourceFile(GetCurrentResourceName(), 'claimed.json', json.encode(data), -1)
-		xPlayer.showNotification("Je hebt 100K ontvangen!")
-        xPlayer.addAccountMoney("bank", 100000)
-    else
-        xPlayer.showNotification("Je hebt dit al geclaimed!")
+RegisterCommand('claimreward', function(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
+
+    local license = getLicense(source)
+    if not license then
+        print('[CLAIMREWARD-BEVEILIGING] Speler zonder license probeerde een reward te claimen')
+        return
     end
+
+    if data[license] then
+        xPlayer.showNotification("Je hebt dit al geclaimed!")
+        return
+    end
+
+    data[license] = true
+    SaveResourceFile(GetCurrentResourceName(), 'claimed.json', json.encode(data), -1)
+
+    xPlayer.addAccountMoney("bank", 100000)
+    xPlayer.showNotification("Je hebt €100.000 ontvangen!")
+
+    print(('[CLAIM] %s (%s) heeft succesvol een reward geclaimed'):format(
+        xPlayer.getName(),
+        license
+    ))
 end, false)
